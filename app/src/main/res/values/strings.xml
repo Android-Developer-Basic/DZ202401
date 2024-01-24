@@ -2,8 +2,12 @@
     <string name="app_name">DZ–2024–01</string>
     <string name="name">Name</string>
     <string name="address">Address</string>
+    <string name="value">Value</string>
     <string name="name_data">Name: %s</string>
     <string name="address_data">Address: %s</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="storage">Storage</string>
+    <string name="save_common">Save to common</string>
+    <string name="save_secure">Save to secure</string>
 </resources>

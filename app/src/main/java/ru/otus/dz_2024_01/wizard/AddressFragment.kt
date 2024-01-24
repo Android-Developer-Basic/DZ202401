@@ -15,7 +15,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.otus.dz_2024_01.R
 import ru.otus.dz_2024_01.databinding.FragmentAddressBinding
-import ru.otus.dz_2024_01.databinding.FragmentNameBinding
 
 @AndroidEntryPoint
 class AddressFragment : Fragment() {
@@ -41,6 +40,9 @@ class AddressFragment : Fragment() {
         withBinding {
             back.setOnClickListener {
                 findNavController().popBackStack()
+            }
+            storage.setOnClickListener {
+                findNavController().navigate(R.id.action_addressFragment_to_storageFragment)
             }
 
             viewLifecycleOwner.lifecycleScope.launch {

@@ -51,6 +51,7 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("androidx.security:security-crypto:1.0.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

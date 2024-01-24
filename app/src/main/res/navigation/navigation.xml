@@ -18,5 +18,15 @@
         android:id="@+id/addressFragment"
         android:name="ru.otus.dz_2024_01.wizard.AddressFragment"
         android:label="AddressFragment"
-        tools:layout="@layout/fragment_address"/>
+        tools:layout="@layout/fragment_address">
+        <action
+            android:id="@+id/action_addressFragment_to_storageFragment"
+            app:destination="@id/keyValueFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/keyValueFragment"
+        android:name="ru.otus.dz_2024_01.secureprefs.StorageFragment"
+        android:label="KeyValueFragment"
+        tools:layout="@layout/fragment_storage"/>
+
 </navigation>
