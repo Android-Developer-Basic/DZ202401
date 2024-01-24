@@ -9,6 +9,7 @@ import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +20,7 @@ import ru.otus.domain.data.Address
 import ru.otus.domain.net.AddressSuggestService
 import ru.otus.net.AddressSuggestServiceImpl
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * View-model for [AddressFragment]
@@ -61,6 +63,7 @@ class AddressViewModel @Inject constructor(
         cache.setAddress(address)
         cancel()
         addressesJob = viewModelScope.launch {
+            delay(1L.seconds)
             addresses.value = service.suggest(address)
         }
     }
