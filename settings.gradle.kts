@@ -15,4 +15,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "DZ-2024-01"
 include(":app")
- 
+include(":net")
+include(":domain")

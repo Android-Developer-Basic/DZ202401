@@ -1,6 +1,7 @@
 package ru.otus.dz_2024_01.wizard
 
 import android.os.Bundle
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,12 @@ class AddressFragment : Fragment() {
 
     private val viewModel: AddressViewModel by viewModels()
 
+    private lateinit var textWatcher: TextWatcher
+
+    private val adapter = AddressAdapter {
+        viewModel.setAddress(it)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -45,17 +52,24 @@ class AddressFragment : Fragment() {
                 findNavController().navigate(R.id.action_addressFragment_to_storageFragment)
             }
 
+            textWatcher = address.addTextChangedListener {
+                viewModel.searchAddress(it.toString())
+            }
+
             viewLifecycleOwner.lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     viewModel.viewState.collect {
+
+                        address.removeTextChangedListener(textWatcher)
                         address.setTextKeepState(it.address)
+                        address.addTextChangedListener(textWatcher)
+
+                        adapter.submitList(it.addressList)
                     }
                 }
             }
 
-            address.addTextChangedListener {
-                viewModel.setAddress(it.toString())
-            }
+            recycler.adapter = adapter
         }
     }
 
