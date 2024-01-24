@@ -8,12 +8,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import ru.otus.domain.data.Address
@@ -31,20 +32,23 @@ class AddressViewModel @Inject constructor(
     private val service: AddressSuggestService
 ) : ViewModel() {
 
-    private val addresses = MutableStateFlow<List<Address>>(emptyList())
-    private var addressesJob: Job? = null
+    private val entry = MutableSharedFlow<String>()
 
     /**
      * View-state for [AddressFragment]
      */
+    @OptIn(FlowPreview::class)
     val viewState: StateFlow<AddressViewState> get() =
-        combine(cache.state, addresses) { data, addresses ->
+        combine(
+            cache.state,
+            entry.debounce(1L.seconds).map { service.suggest(it) }
+        ) { data, addresses ->
             render(data, addresses)
         }
         .stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
-            render(cache.state.value, addresses.value)
+            render(cache.state.value, emptyList())
         )
 
     /**
@@ -52,24 +56,16 @@ class AddressViewModel @Inject constructor(
      */
     fun setAddress(address: String) {
         cache.setAddress(address)
-        cancel()
-        addresses.value = emptyList()
     }
 
     /**
      * Searches for address
      */
     fun searchAddress(address: String) {
-        cache.setAddress(address)
-        cancel()
-        addressesJob = viewModelScope.launch {
-            delay(1L.seconds)
-            addresses.value = service.suggest(address)
+        setAddress(address)
+        viewModelScope.launch {
+            entry.emit(address)
         }
-    }
-
-    private fun cancel() {
-        addressesJob?.cancel()
     }
 
     /**
