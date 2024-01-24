@@ -1,11 +1,13 @@
 package ru.otus.dz_2024_01
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import ru.otus.dz_2024_01.wizard.AddressViewState
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import ru.otus.dz_2024_01.wizard.RegData
 import ru.otus.dz_2024_01.wizard.WizardCache
 import javax.inject.Inject
 
@@ -14,17 +16,17 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class DataViewModel @Inject constructor(private val cache: WizardCache) : ViewModel() {
-    private val _viewState = MutableStateFlow(render())
-
     /**
      * View-state for [DataFragment]
      */
-    val viewState: StateFlow<DataViewState> get() = _viewState.asStateFlow()
+    val viewState: StateFlow<DataViewState> get() = cache.state
+        .map { render(it) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, render(cache.state.value))
 
     /**
      * Renders view-state
      */
-    private fun render() = DataViewState(cache.name, cache.address)
+    private fun render(data: RegData) = DataViewState(data.name, data.address)
 }
 
 /**

@@ -1,10 +1,12 @@
 package ru.otus.dz_2024_01.wizard
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 /**
@@ -12,29 +14,27 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AddressViewModel @Inject constructor(private val cache: WizardCache) : ViewModel() {
-
-    private val _viewState = MutableStateFlow(render())
-
     /**
      * View-state for [AddressFragment]
      */
-    val viewState: StateFlow<AddressViewState> get() = _viewState.asStateFlow()
+    val viewState: StateFlow<AddressViewState> get() = cache.state
+        .map { render(it) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, render(cache.state.value))
 
     /**
      * Sets address
      */
     fun setAddress(address: String) {
-        cache.address = address
-        _viewState.value = render()
+        cache.setAddress(address)
     }
 
     /**
      * Renders view-state
      */
-    private fun render() = AddressViewState(cache.name, cache.address)
+    private fun render(data: RegData) = AddressViewState(data.address)
 }
 
 /**
  * View-state for [AddressFragment]
  */
-data class AddressViewState(val name: String, val address: String)
+data class AddressViewState(val address: String)
