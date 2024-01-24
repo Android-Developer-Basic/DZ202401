@@ -32,7 +32,7 @@ class AddressViewModel @Inject constructor(
     private val service: AddressSuggestService
 ) : ViewModel() {
 
-    private val entry = MutableSharedFlow<String>()
+    private val entry = MutableSharedFlow<SuggestCommand>()
 
     /**
      * View-state for [AddressFragment]
@@ -41,7 +41,19 @@ class AddressViewModel @Inject constructor(
     val viewState: StateFlow<AddressViewState> get() =
         combine(
             cache.state,
-            entry.debounce(1L.seconds).map { service.suggest(it) }
+            entry
+                .debounce {
+                    when(it) {
+                        is SuggestCommand.Search -> 1L.seconds
+                        is SuggestCommand.Clear -> 0L.seconds
+                    }
+                }
+                .map {
+                    when(it) {
+                        is SuggestCommand.Search -> service.suggest(it.address)
+                        is SuggestCommand.Clear -> emptyList()
+                    }
+                }
         ) { data, addresses ->
             render(data, addresses)
         }
@@ -56,6 +68,9 @@ class AddressViewModel @Inject constructor(
      */
     fun setAddress(address: String) {
         cache.setAddress(address)
+        viewModelScope.launch {
+            entry.emit(SuggestCommand.Clear)
+        }
     }
 
     /**
@@ -64,7 +79,7 @@ class AddressViewModel @Inject constructor(
     fun searchAddress(address: String) {
         setAddress(address)
         viewModelScope.launch {
-            entry.emit(address)
+            entry.emit(SuggestCommand.Search(address))
         }
     }
 
@@ -72,6 +87,14 @@ class AddressViewModel @Inject constructor(
      * Renders view-state
      */
     private fun render(data: RegData, addresses: List<Address>) = AddressViewState(data.address, addresses)
+}
+
+/**
+ * Commands for [AddressViewModel] address suggestions
+ */
+sealed class SuggestCommand {
+    data class Search(val address: String) : SuggestCommand()
+    data object Clear : SuggestCommand()
 }
 
 /**
