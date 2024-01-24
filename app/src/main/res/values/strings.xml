@@ -2,7 +2,8 @@
     <string name="app_name">DZ–2024–01</string>
     <string name="name">Name</string>
     <string name="address">Address</string>
-    <string name="address_for">Address for %s</string>
+    <string name="name_data">Name: %s</string>
+    <string name="address_data">Address: %s</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 </resources>
